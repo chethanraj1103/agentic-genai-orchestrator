@@ -27,3 +27,39 @@ This project demonstrates how to build **reliable agentic systems around unrelia
 
 ## 🏗️ Architecture
 
+User Task
+│
+▼
+Agent Loop (Plan → Tool → Evaluate → Retry)
+│
+├── Tavily Search Tool
+├── Calculator Tool
+└── Code Execution Tool
+│
+▼
+Structured JSON Output (result + steps)
+
+
+---
+
+## 🛠️ Tech Stack
+
+- Python, FastAPI  
+- Groq (Open-source LLMs)  
+- Tavily Search API  
+- Custom agent loop  
+- Render (deployment)  
+- HTML UI  
+
+---
+
+## 📦 Example API Request
+
+```bash
+curl -X POST "https://agentic-genai-orchestrator.onrender.com/run" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Research top 3 payment gateway competitors of Razorpay in India and summarize their pricing"
+  }'
+
+
