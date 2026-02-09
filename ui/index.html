@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Agentic AI Task Orchestrator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: #0f1220;
+            color: #eaeaf0;
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: #b8b9d4;
+            margin-top: 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #2a2f55;
+            background: #141736;
+            color: #fff;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #5b7cfa;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .card {
+            background: #141736;
+            border: 1px solid #2a2f55;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .steps {
+            margin-top: 12px;
+        }
+
+        .step {
+            padding: 10px;
+            border-radius: 8px;
+            background: #0f1220;
+            border: 1px solid #2a2f55;
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #9aa0ff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .value {
+            white-space: pre-wrap;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .result {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Agentic AI Task Orchestrator</h1>
+        <p>Give a task. The agent will plan, use tools, and return a result.</p>
+
+        <textarea id="taskInput"
+            placeholder="e.g. Research top 3 payment gateway competitors of Razorpay in India and summarize their pricing"></textarea>
+        <br />
+        <button id="runBtn">Run Agent</button>
+
+        <div id="output" class="card" style="display:none;">
+            <h3>Final Result</h3>
+            <div id="result" class="result"></div>
+
+            <h3>Agent Steps</h3>
+            <div id="steps" class="steps"></div>
+        </div>
+    </div>
+
+    <script>
+        const runBtn = document.getElementById("runBtn");
+        const taskInput = document.getElementById("taskInput");
+        const output = document.getElementById("output");
+        const resultDiv = document.getElementById("result");
+        const stepsDiv = document.getElementById("steps");
+
+        runBtn.onclick = async () => {
+            const task = taskInput.value.trim();
+            if (!task) return alert("Enter a task");
+
+            runBtn.disabled = true;
+            runBtn.innerText = "Running...";
+
+            try {
+                const res = await fetch("/run", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ task })
+                });
+
+                const data = await res.json();
+
+                output.style.display = "block";
+                resultDiv.innerText = data.result || "";
+
+                stepsDiv.innerHTML = "";
+                (data.steps || []).forEach((s, i) => {
+                    const div = document.createElement("div");
+                    div.className = "step";
+                    div.innerHTML = `
+            <div class="label">Step ${i + 1} – Thought</div>
+            <div class="value">${s.thought}</div>
+            <div class="label">Action</div>
+            <div class="value">${s.action}</div>
+            <div class="label">Observation</div>
+            <div class="value">${s.observation}</div>
+          `;
+                    stepsDiv.appendChild(div);
+                });
+            } catch (e) {
+                alert("Error: " + e.message);
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerText = "Run Agent";
+            }
+        };
+    </script>
+</body>
+
+</html>
